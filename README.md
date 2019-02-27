@@ -7,4 +7,4 @@ on Flutter
 
 ![Play](images/a5.gif)
 
-[https://benzneststudios.com/blog/flutter/the-matrix-wallpaper-with-flutter/] (https://benzneststudios.com/blog/flutter/the-matrix-wallpaper-with-flutter/)
+[https://benzneststudios.com/blog/flutter/the-matrix-wallpaper-with-flutter/](https://benzneststudios.com/blog/flutter/the-matrix-wallpaper-with-flutter/)
