@@ -44,18 +44,18 @@ class Line {
 
   Line({this.rowHead = 0, this.colHead = 0, this.size = 10});
 
-  moveDown() {
-    rowHead = rowHead + 1;
+  moveDown({int move = 1}) {
+    rowHead = rowHead + move;
   }
 }
 
 class _MyMatrixPageState extends State<MyMatrixPage> {
-
   int ROW = 200;
   int COL = 300;
 
   List<List<Pixel>> matrixTable;
   Timer timer;
+  Timer timer2;
   List<Line> listLine;
 
 //  List<Color> color = [
@@ -95,19 +95,20 @@ class _MyMatrixPageState extends State<MyMatrixPage> {
     Color(0x5510d630),
     Color(0x4410d630),
     Color(0x3310d630),
-    Color(0x2210d630)
+    Color(0x2210d630),
+    Color(0x1110d630),
+    Color(0x0510d630)
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(color: Colors.black, child: buildMatrixTable())
-    );
+        body: Container(color: Colors.black, child: buildMatrixTable()));
   }
 
   initState() {
-    timer = Timer.periodic(
-        Duration(milliseconds: 250), (Timer t) => process());
+    timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) => process());
+    timer2 = Timer.periodic(Duration(milliseconds: 300), (Timer t) => process());
     super.initState();
   }
 
@@ -136,7 +137,16 @@ class _MyMatrixPageState extends State<MyMatrixPage> {
 
       for (Line line in listLine) {
         addLineToMatrixTable(matrixTable, line);
-        line.moveDown();
+
+        Random random = Random();
+        int number = random.nextInt(100);
+        if (number < 20) {
+          line.moveDown(move: 2);
+        }  else if (number < 80) {
+          line.moveDown();
+        } else {
+          //
+        }
 
         if (line.rowHead - line.size >= ROW) {
           listLine.remove(line);
@@ -183,24 +193,22 @@ class _MyMatrixPageState extends State<MyMatrixPage> {
   }
 
   Widget buildMatrixTable() {
-    ROW = MediaQuery
-        .of(context)
-        .size
-        .height ~/ 12;
+    ROW = MediaQuery.of(context).size.height ~/ 12;
 
-    COL = MediaQuery
-        .of(context)
-        .size
-        .width ~/ 12;
+    COL = MediaQuery.of(context).size.width ~/ 12;
 
     if (matrixTable != null) {
       List<Widget> listRow = List();
       for (int row = 0; row < ROW; row++) {
         List<Widget> listCol = List();
         for (int col = 0; col < COL; col++) {
-          listCol.add(Container(width: 12, height: 12,
+          listCol.add(Container(
+              width: 12,
+              height: 12,
               child: Text(matrixTable[row][col].data,
-                  style: TextStyle(color: matrixTable[row][col].color, fontWeight: FontWeight.bold))));
+                  style: TextStyle(
+                      color: matrixTable[row][col].color,
+                      fontWeight: FontWeight.bold))));
         }
         listRow.add(Row(children: listCol));
       }
