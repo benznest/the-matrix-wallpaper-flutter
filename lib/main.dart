@@ -6,25 +6,20 @@ import 'package:flutter/material.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    String title = 'The Matrix';
     return MaterialApp(
-      title: 'The Matrix',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyMatrixPage(title: 'The Matrix'),
+      title: title,
+      home: MyMatrixPage(title: title),
     );
   }
 }
 
 class MyMatrixPage extends StatefulWidget {
-  MyMatrixPage({Key key, this.title, this.row, this.col}) : super(key: key);
+  MyMatrixPage({Key key, this.title}) : super(key: key);
 
   final String title;
-  final String row;
-  final String col;
 
   @override
   _MyMatrixPageState createState() => _MyMatrixPageState();
@@ -50,35 +45,16 @@ class Line {
 }
 
 class _MyMatrixPageState extends State<MyMatrixPage> {
-  int ROW = 200;
-  int COL = 300;
+  int countRow = 0, countCol = 0;
+  double sizeOfPixel = 12;
 
+  Timer timer, timer2;
   List<List<Pixel>> matrixTable;
-  Timer timer;
-  Timer timer2;
   List<Line> listLine;
 
-//  List<Color> color = [
-//    Color(0xff3b6d43),
-//    Color(0xff3b6d43),
-//    Color(0xff3b6d43),
-//    Color(0xff3b6d43),
-//    Color(0xee3b6d43),
-//    Color(0xdd3b6d43),
-//    Color(0xcc3b6d43),
-//    Color(0xbb3b6d43),
-//    Color(0xaa3b6d43),
-//    Color(0x993b6d43),
-//    Color(0x883b6d43),
-//    Color(0x773b6d43),
-//    Color(0x663b6d43),
-//    Color(0x553b6d43),
-//    Color(0x443b6d43),
-//    Color(0x333b6d43),
-//    Color(0x223b6d43)
-//  ];
-
   List<Color> color = [
+    Color(0xff7aff68),
+    Color(0xff10ff30),
     Color(0xff10d630),
     Color(0xff10d630),
     Color(0xff10d630),
@@ -108,14 +84,15 @@ class _MyMatrixPageState extends State<MyMatrixPage> {
 
   initState() {
     timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) => process());
-    timer2 = Timer.periodic(Duration(milliseconds: 300), (Timer t) => process());
+    timer2 =
+        Timer.periodic(Duration(milliseconds: 300), (Timer t) => process());
     super.initState();
   }
 
   void initLine() {
     listLine = List();
-    for (int i = 0; i < COL * 2; i++) {
-      listLine.add(randomLine(maxRow: ROW, maxCol: COL));
+    for (int i = 0; i < countCol * 2; i++) {
+      listLine.add(randomLine(maxRow: countRow, maxCol: countCol));
     }
   }
 
@@ -130,37 +107,34 @@ class _MyMatrixPageState extends State<MyMatrixPage> {
     if (matrixTable == null) {
       initMatrixTable();
       initLine();
+    } else {
+      setState(() {
+        initMatrixTable();
+
+        for (Line line in listLine) {
+          addLineToMatrixTable(matrixTable, line);
+
+          int number = Random().nextInt(100);
+          if (number < 20) {
+            line.moveDown(move: 2);
+          } else if (number < 80) {
+            line.moveDown();
+          }
+
+          if (line.rowHead - line.size >= countRow) {
+            listLine.remove(line);
+            listLine.add(randomLine(maxRow: 1, maxCol: countCol));
+          }
+        }
+      });
     }
-
-    setState(() {
-      initMatrixTable();
-
-      for (Line line in listLine) {
-        addLineToMatrixTable(matrixTable, line);
-
-        Random random = Random();
-        int number = random.nextInt(100);
-        if (number < 20) {
-          line.moveDown(move: 2);
-        }  else if (number < 80) {
-          line.moveDown();
-        } else {
-          //
-        }
-
-        if (line.rowHead - line.size >= ROW) {
-          listLine.remove(line);
-          listLine.add(randomLine(maxRow: 1, maxCol: COL));
-        }
-      }
-    });
   }
 
   void addLineToMatrixTable(List<List<Pixel>> matrixTable, Line line) {
     for (int i = 0; i < line.size; i++) {
       int row = line.rowHead - i;
-      if (row >= 0 && row < ROW) {
-        matrixTable[row][line.colHead].data = randomData();
+      if (row >= 0 && row < countRow) {
+        matrixTable[row][line.colHead].data = randomCharacter();
         if (i < color.length) {
           matrixTable[row][line.colHead].color = color[i];
         } else {
@@ -170,22 +144,20 @@ class _MyMatrixPageState extends State<MyMatrixPage> {
     }
   }
 
-  String randomData() {
+  String randomCharacter() {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    Random rand = Random();
-    return chars[rand.nextInt(chars.length)];
+    return chars[Random().nextInt(chars.length)];
   }
 
   int randomNumber({int min = 0, int max = 10}) {
-    Random rand = Random();
-    return rand.nextInt(max) + min;
+    return Random().nextInt(max) + min;
   }
 
   void initMatrixTable() {
     matrixTable = List();
-    for (int row = 0; row < ROW; row++) {
+    for (int row = 0; row < countRow; row++) {
       List<Pixel> list = List();
-      for (int col = 0; col < COL; col++) {
+      for (int col = 0; col < countCol; col++) {
         list.add(Pixel());
       }
       matrixTable.add(list);
@@ -193,18 +165,17 @@ class _MyMatrixPageState extends State<MyMatrixPage> {
   }
 
   Widget buildMatrixTable() {
-    ROW = MediaQuery.of(context).size.height ~/ 12;
-
-    COL = MediaQuery.of(context).size.width ~/ 12;
+    countRow = MediaQuery.of(context).size.height ~/ 12;
+    countCol = MediaQuery.of(context).size.width ~/ 12;
 
     if (matrixTable != null) {
       List<Widget> listRow = List();
-      for (int row = 0; row < ROW; row++) {
+      for (int row = 0; row < countRow; row++) {
         List<Widget> listCol = List();
-        for (int col = 0; col < COL; col++) {
+        for (int col = 0; col < countCol; col++) {
           listCol.add(Container(
-              width: 12,
-              height: 12,
+              width: sizeOfPixel,
+              height: sizeOfPixel,
               child: Text(matrixTable[row][col].data,
                   style: TextStyle(
                       color: matrixTable[row][col].color,
@@ -214,8 +185,7 @@ class _MyMatrixPageState extends State<MyMatrixPage> {
       }
 
       return Column(children: listRow);
-    } else {
-      return Container();
     }
+    return Container();
   }
 }
